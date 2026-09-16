@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Kasirku POS - Toko Sembako & QRIS</title>
+  <title>Kasirku POS - Toolbar Floating QRIS</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -68,7 +68,7 @@
     ];
 
     function App() {
-      // Active Tabs: 'home' (Pencatatan), 'qris' (Pembayaran QRIS), 'bookings' (Pesanan), 'support' (Laporan), 'account' (Stok)
+      // Active Tabs: 'home', 'bookings', 'qris', 'support', 'account'
       const [activeTab, setActiveTab] = useState('home');
 
       // Inventaris Sembako
@@ -292,7 +292,7 @@
       };
 
       return (
-        <div className="min-h-screen flex flex-col justify-between max-w-2xl mx-auto bg-white shadow-sm border-x border-slate-200">
+        <div className="min-h-screen flex flex-col justify-between max-w-2xl mx-auto bg-white shadow-sm border-x border-slate-200 relative pb-16">
 
           {/* MAIN APP HEADER */}
           <header className="bg-slate-900 text-white px-4 py-3 border-b border-slate-800 sticky top-0 z-30 flex items-center justify-between shadow-sm">
@@ -302,7 +302,7 @@
               </div>
               <div>
                 <h1 className="text-sm font-extrabold tracking-wide">Toko Sembako Berkah Jaya</h1>
-                <p className="text-[11px] text-emerald-400 font-semibold">Pencatatan Penjualan & QRIS</p>
+                <p className="text-[11px] text-emerald-400 font-semibold">Pencatatan Penjualan & Floating QRIS</p>
               </div>
             </div>
 
@@ -504,7 +504,7 @@
 
                       <button
                         onClick={() => setActiveTab('qris')}
-                        className="py-3 bg-slate-800 border border-emerald-500 hover:bg-slate-700 text-emerald-400 font-bold rounded-xl text-xs shadow-md transition flex items-center justify-center gap-1.5"
+                        className="py-3 bg-slate-800 border border-lime-400 hover:bg-slate-700 text-lime-400 font-bold rounded-xl text-xs shadow-md transition flex items-center justify-center gap-1.5"
                       >
                         <i data-lucide="qr-code" className="w-4 h-4"></i>
                         <span>BAYAR QRIS</span>
@@ -516,7 +516,7 @@
               </div>
             )}
 
-            {/* TAB CONTENT: PEMBAYARAN QRIS (MENU TOOLBAR BARU) */}
+            {/* TAB CONTENT: PEMBAYARAN QRIS */}
             {activeTab === 'qris' && (
               <div className="space-y-4">
                 <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm text-center space-y-4">
@@ -525,7 +525,6 @@
                     <h2 className="text-base font-extrabold text-slate-900">Pembayaran QRIS Toko Sembako</h2>
                   </div>
 
-                  {/* Nominal QRIS jika ada nota aktif */}
                   <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl space-y-1">
                     <span className="text-xs text-emerald-800 font-bold">TOTAL TAGIHAN QRIS</span>
                     <div className="text-2xl font-black text-emerald-700">{formatRp(subtotal)}</div>
@@ -536,7 +535,6 @@
                     )}
                   </div>
 
-                  {/* QR CODE DISPLAY */}
                   <div className="p-4 bg-white border-2 border-slate-900 rounded-3xl w-fit mx-auto shadow-md space-y-2">
                     <img
                       src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=TOKO-SEMBAKO-BERKAH-QRIS-PAYMENT-RP-${subtotal}`}
@@ -546,7 +544,6 @@
                     <div className="text-[10px] font-mono font-bold text-slate-600 tracking-wider uppercase">NMID: ID1029384756201</div>
                   </div>
 
-                  {/* Supported Payment Logos / Text */}
                   <div className="space-y-1.5 text-xs text-slate-600">
                     <p className="font-bold text-slate-800">Mendukung Seluruh Aplikasi e-Wallet & Banking:</p>
                     <div className="flex flex-wrap justify-center gap-1.5 text-[11px] font-semibold text-slate-700">
@@ -559,7 +556,6 @@
                     </div>
                   </div>
 
-                  {/* Action Buttons */}
                   {cart.length > 0 && (
                     <button
                       onClick={() => processPenjualan('QRIS')}
@@ -715,57 +711,53 @@
 
           </main>
 
-          {/* BOTTOM NAVIGATION TOOLBAR (5 MENU TOOLBAR) */}
-          <nav className="bg-white border-t border-gray-200 py-2 px-3 flex justify-around items-center sticky bottom-0 z-30 shadow-lg">
+          {/* FLOATING CURVED NAVBAR WITH CENTER FLOATING GREEN BUTTON FOR QRIS (EXACT MATCH TO REFERENCE IMAGE) */}
+          <nav className="bg-white/95 backdrop-blur-md border-t border-gray-200 py-1.5 px-3 flex justify-around items-center sticky bottom-0 z-40 shadow-lg">
+
+            {/* Left 1: Home / Pencatatan */}
             <button
               onClick={() => setActiveTab('home')}
-              className={`flex flex-col items-center gap-1 transition ${activeTab === 'home' ? 'text-emerald-700 font-bold' : 'text-gray-400 hover:text-gray-600'}`}
+              className={`flex flex-col items-center gap-0.5 transition ${activeTab === 'home' ? 'text-emerald-700 font-extrabold' : 'text-gray-400 hover:text-gray-600'}`}
             >
-              <div className={`p-1.5 rounded-full ${activeTab === 'home' ? 'bg-emerald-50' : ''}`}>
-                <i data-lucide="edit-3" className="w-5 h-5"></i>
-              </div>
-              <span className="text-[10px]">Pencatatan</span>
+              <i data-lucide="home" className="w-5 h-5"></i>
+              <span className="text-[10px]">Home</span>
             </button>
 
-            <button
-              onClick={() => setActiveTab('qris')}
-              className={`flex flex-col items-center gap-1 transition ${activeTab === 'qris' ? 'text-emerald-700 font-bold' : 'text-gray-400 hover:text-gray-600'}`}
-            >
-              <div className={`p-1.5 rounded-full ${activeTab === 'qris' ? 'bg-emerald-50' : ''}`}>
-                <i data-lucide="qr-code" className="w-5 h-5"></i>
-              </div>
-              <span className="text-[10px]">QRIS</span>
-            </button>
-
+            {/* Left 2: Pesanan / Riwayat */}
             <button
               onClick={() => setActiveTab('bookings')}
-              className={`flex flex-col items-center gap-1 transition ${activeTab === 'bookings' ? 'text-emerald-700 font-bold' : 'text-gray-400 hover:text-gray-600'}`}
+              className={`flex flex-col items-center gap-0.5 transition ${activeTab === 'bookings' ? 'text-emerald-700 font-extrabold' : 'text-gray-400 hover:text-gray-600'}`}
             >
-              <div className={`p-1.5 rounded-full ${activeTab === 'bookings' ? 'bg-emerald-50' : ''}`}>
-                <i data-lucide="calendar" className="w-5 h-5"></i>
-              </div>
+              <i data-lucide="receipt" className="w-5 h-5"></i>
               <span className="text-[10px]">Pesanan</span>
             </button>
 
+            {/* CENTER FLOATING GREEN CIRCLE FAB BUTTON FOR QRIS SCANNER */}
+            <button
+              onClick={() => setActiveTab('qris')}
+              className="relative -top-3.5 w-12 h-12 rounded-full bg-gradient-to-tr from-lime-500 via-emerald-500 to-emerald-600 text-slate-950 flex items-center justify-center font-black shadow-lg shadow-emerald-500/30 ring-4 ring-white active:scale-90 transition transform hover:scale-105"
+            >
+              <i data-lucide="qr-code" className="w-6 h-6 text-slate-950"></i>
+            </button>
+
+            {/* Right 1: Laporan */}
             <button
               onClick={() => setActiveTab('support')}
-              className={`flex flex-col items-center gap-1 transition ${activeTab === 'support' ? 'text-emerald-700 font-bold' : 'text-gray-400 hover:text-gray-600'}`}
+              className={`flex flex-col items-center gap-0.5 transition ${activeTab === 'support' ? 'text-emerald-700 font-extrabold' : 'text-gray-400 hover:text-gray-600'}`}
             >
-              <div className={`p-1.5 rounded-full ${activeTab === 'support' ? 'bg-emerald-50' : ''}`}>
-                <i data-lucide="headphones" className="w-5 h-5"></i>
-              </div>
+              <i data-lucide="bar-chart-2" className="w-5 h-5"></i>
               <span className="text-[10px]">Laporan</span>
             </button>
 
+            {/* Right 2: Stok / Menu */}
             <button
               onClick={() => setActiveTab('account')}
-              className={`flex flex-col items-center gap-1 transition ${activeTab === 'account' ? 'text-emerald-700 font-bold' : 'text-gray-400 hover:text-gray-600'}`}
+              className={`flex flex-col items-center gap-0.5 transition ${activeTab === 'account' ? 'text-emerald-700 font-extrabold' : 'text-gray-400 hover:text-gray-600'}`}
             >
-              <div className={`p-1.5 rounded-full ${activeTab === 'account' ? 'bg-emerald-50' : ''}`}>
-                <i data-lucide="user" className="w-5 h-5"></i>
-              </div>
+              <i data-lucide="grid" className="w-5 h-5"></i>
               <span className="text-[10px]">Stok</span>
             </button>
+
           </nav>
 
           {/* Struk Thermal Modal */}
