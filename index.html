@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Kasirku POS - Toolbar Floating QRIS</title>
+  <title>Kasirku POS - Sistem Penjualan Toko Sembako</title>
+  <!-- Favicon Logo Kasir POS -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 10V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V10'/><rect x='3' y='14' width='18' height='7' rx='1.5' fill='%2310b981' fill-opacity='0.2'/><path d='M6 10L9 3H15L18 10'/><rect x='8.5' y='5.5' width='7' height='3' rx='1'/></svg>" />
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -338,13 +340,29 @@
 
           {/* MAIN APP HEADER */}
           <header className="bg-slate-900 text-white px-4 py-3 border-b border-slate-800 sticky top-0 z-30 flex items-center justify-between shadow-sm">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-emerald-500 text-slate-950 flex items-center justify-center font-black shadow">
-                <i data-lucide="store" className="w-5 h-5"></i>
+            <div className="flex items-center gap-3">
+              {/* LOGO MESIN KASIR POS PRESISE */}
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 via-emerald-400 to-lime-400 text-slate-950 flex items-center justify-center font-black shadow-md shadow-emerald-500/20 ring-2 ring-emerald-400/30">
+                <svg className="w-6 h-6 text-slate-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  {/* Mesin Kasir Drawers & Body */}
+                  <path d="M4 10V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V10" />
+                  <rect x="3" y="13" width="18" height="8" rx="1.5" fill="currentColor" fillOpacity="0.25" />
+                  <path d="M6 10L9 3H15L18 10" />
+                  <rect x="8.5" y="5.5" width="7" height="3" rx="1" strokeWidth="1.8" />
+                  {/* Tombol Kasir */}
+                  <circle cx="7.5" cy="17" r="0.75" fill="currentColor" />
+                  <circle cx="12" cy="17" r="0.75" fill="currentColor" />
+                  <circle cx="16.5" cy="17" r="0.75" fill="currentColor" />
+                </svg>
               </div>
               <div>
-                <h1 className="text-sm font-extrabold tracking-wide">Toko Sembako Berkah Jaya</h1>
-                <p className="text-[11px] text-emerald-400 font-semibold">Pencatatan Penjualan & Floating QRIS</p>
+                <h1 className="text-sm font-black tracking-wide flex items-center gap-1.5">
+                  <span>Kasirku POS Sembako</span>
+                  <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[9px] px-1.5 py-0.2 rounded font-extrabold">
+                    PRO
+                  </span>
+                </h1>
+                <p className="text-[11px] text-emerald-400 font-semibold">Toko Sembako Berkah Jaya</p>
               </div>
             </div>
 
