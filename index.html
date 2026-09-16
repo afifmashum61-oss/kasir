@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Kasirku POS - Toko Sembako</title>
+  <title>Kasirku POS - Toko Sembako & QRIS</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -68,7 +68,8 @@
     ];
 
     function App() {
-      const [activeTab, setActiveTab] = useState('home'); // 'home', 'bookings', 'support', 'account'
+      // Active Tabs: 'home' (Pencatatan), 'qris' (Pembayaran QRIS), 'bookings' (Pesanan), 'support' (Laporan), 'account' (Stok)
+      const [activeTab, setActiveTab] = useState('home');
 
       // Inventaris Sembako
       const [inventory, setInventory] = useState(() => {
@@ -182,24 +183,26 @@
       const cartTotalCount = useMemo(() => cart.reduce((acc, i) => acc + i.quantity, 0), [cart]);
       const subtotal = useMemo(() => cart.reduce((acc, i) => acc + (i.price * i.quantity), 0), [cart]);
 
-      const processPenjualan = () => {
+      // Proses Pembayaran Tunai atau QRIS
+      const processPenjualan = (method = 'TUNAI') => {
         if (cart.length === 0) {
           alert('Belum ada item barang dalam pencatatan penjualan!');
           return;
         }
 
-        const cashNum = parseFloat(cashGiven) || subtotal;
-        if (cashNum < subtotal) {
+        const cashNum = method === 'QRIS' ? subtotal : (parseFloat(cashGiven) || subtotal);
+        if (method === 'TUNAI' && cashNum < subtotal) {
           alert(`Uang diterima kurang! Diperlukan setidaknya ${formatRp(subtotal)}`);
           return;
         }
 
-        const change = cashNum - subtotal;
+        const change = method === 'QRIS' ? 0 : Math.max(0, cashNum - subtotal);
         const newReceipt = {
           id: 'NOTA-' + Math.floor(100000 + Math.random() * 900000),
           date: new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }),
           items: [...cart],
           total: subtotal,
+          paymentMethod: method,
           cashGiven: cashNum,
           change
         };
@@ -291,7 +294,7 @@
       return (
         <div className="min-h-screen flex flex-col justify-between max-w-2xl mx-auto bg-white shadow-sm border-x border-slate-200">
 
-          {/* MAIN NATIVE APP HEADER */}
+          {/* MAIN APP HEADER */}
           <header className="bg-slate-900 text-white px-4 py-3 border-b border-slate-800 sticky top-0 z-30 flex items-center justify-between shadow-sm">
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-xl bg-emerald-500 text-slate-950 flex items-center justify-center font-black shadow">
@@ -299,7 +302,7 @@
               </div>
               <div>
                 <h1 className="text-sm font-extrabold tracking-wide">Toko Sembako Berkah Jaya</h1>
-                <p className="text-[11px] text-emerald-400 font-semibold">Pencatatan Penjualan Kasir</p>
+                <p className="text-[11px] text-emerald-400 font-semibold">Pencatatan Penjualan & QRIS</p>
               </div>
             </div>
 
@@ -464,7 +467,7 @@
                   </div>
                 </div>
 
-                {/* KALKULATOR PEMBAYARAN */}
+                {/* KALKULATOR PEMBAYARAN TUNAI */}
                 {cart.length > 0 && (
                   <div className="bg-slate-900 text-white p-4 rounded-2xl shadow-md space-y-3">
                     <div className="flex justify-between items-center border-b border-slate-800 pb-2">
@@ -473,7 +476,7 @@
                     </div>
 
                     <div className="space-y-2 text-xs">
-                      <label className="block text-gray-300 font-bold">Uang Diterima (Rp)</label>
+                      <label className="block text-gray-300 font-bold">Uang Diterima Tunai (Rp)</label>
                       <input
                         type="number"
                         value={cashGiven}
@@ -490,16 +493,83 @@
                       )}
                     </div>
 
-                    <button
-                      onClick={processPenjualan}
-                      className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black rounded-xl text-xs tracking-wider shadow-lg transition flex items-center justify-center gap-2 active:scale-95"
-                    >
-                      <i data-lucide="check-circle" className="w-4 h-4"></i>
-                      <span>SIMPAN PENJUALAN & CETAK NOTA</span>
-                    </button>
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                      <button
+                        onClick={() => processPenjualan('TUNAI')}
+                        className="py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-md transition flex items-center justify-center gap-1.5"
+                      >
+                        <i data-lucide="banknote" className="w-4 h-4"></i>
+                        <span>BAYAR TUNAI</span>
+                      </button>
+
+                      <button
+                        onClick={() => setActiveTab('qris')}
+                        className="py-3 bg-slate-800 border border-emerald-500 hover:bg-slate-700 text-emerald-400 font-bold rounded-xl text-xs shadow-md transition flex items-center justify-center gap-1.5"
+                      >
+                        <i data-lucide="qr-code" className="w-4 h-4"></i>
+                        <span>BAYAR QRIS</span>
+                      </button>
+                    </div>
                   </div>
                 )}
 
+              </div>
+            )}
+
+            {/* TAB CONTENT: PEMBAYARAN QRIS (MENU TOOLBAR BARU) */}
+            {activeTab === 'qris' && (
+              <div className="space-y-4">
+                <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm text-center space-y-4">
+                  <div className="flex items-center justify-center gap-2 border-b border-gray-100 pb-3">
+                    <i data-lucide="qr-code" className="w-6 h-6 text-emerald-600"></i>
+                    <h2 className="text-base font-extrabold text-slate-900">Pembayaran QRIS Toko Sembako</h2>
+                  </div>
+
+                  {/* Nominal QRIS jika ada nota aktif */}
+                  <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl space-y-1">
+                    <span className="text-xs text-emerald-800 font-bold">TOTAL TAGIHAN QRIS</span>
+                    <div className="text-2xl font-black text-emerald-700">{formatRp(subtotal)}</div>
+                    {cart.length > 0 ? (
+                      <p className="text-[11px] text-emerald-800 font-semibold">{cartTotalCount} Item dalam Nota Belanja</p>
+                    ) : (
+                      <p className="text-[11px] text-gray-500">Scan QRIS Standar Toko Sembako</p>
+                    )}
+                  </div>
+
+                  {/* QR CODE DISPLAY */}
+                  <div className="p-4 bg-white border-2 border-slate-900 rounded-3xl w-fit mx-auto shadow-md space-y-2">
+                    <img
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=TOKO-SEMBAKO-BERKAH-QRIS-PAYMENT-RP-${subtotal}`}
+                      alt="QRIS Pembayaran"
+                      className="w-48 h-48 mx-auto rounded-xl"
+                    />
+                    <div className="text-[10px] font-mono font-bold text-slate-600 tracking-wider uppercase">NMID: ID1029384756201</div>
+                  </div>
+
+                  {/* Supported Payment Logos / Text */}
+                  <div className="space-y-1.5 text-xs text-slate-600">
+                    <p className="font-bold text-slate-800">Mendukung Seluruh Aplikasi e-Wallet & Banking:</p>
+                    <div className="flex flex-wrap justify-center gap-1.5 text-[11px] font-semibold text-slate-700">
+                      <span className="px-2.5 py-1 bg-gray-100 rounded-md border">GoPay</span>
+                      <span className="px-2.5 py-1 bg-gray-100 rounded-md border">OVO</span>
+                      <span className="px-2.5 py-1 bg-gray-100 rounded-md border">ShopeePay</span>
+                      <span className="px-2.5 py-1 bg-gray-100 rounded-md border">DANA</span>
+                      <span className="px-2.5 py-1 bg-gray-100 rounded-md border">BCA Mobile</span>
+                      <span className="px-2.5 py-1 bg-gray-100 rounded-md border">Livin Mandiri</span>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  {cart.length > 0 && (
+                    <button
+                      onClick={() => processPenjualan('QRIS')}
+                      className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-lg transition flex items-center justify-center gap-2"
+                    >
+                      <i data-lucide="check-circle" className="w-4 h-4"></i>
+                      <span>KONFIRMASI LUNAS QRIS & CETAK NOTA</span>
+                    </button>
+                  )}
+                </div>
               </div>
             )}
 
@@ -526,6 +596,9 @@
                           <div>
                             <div className="font-bold text-xs text-slate-800 flex items-center gap-2">
                               <span>{trx.id}</span>
+                              <span className="bg-emerald-50 text-emerald-700 text-[10px] px-2 py-0.5 rounded-md font-bold">
+                                {trx.paymentMethod}
+                              </span>
                             </div>
                             <p className="text-[11px] text-gray-400 mt-0.5">{trx.date}</p>
                           </div>
@@ -642,8 +715,8 @@
 
           </main>
 
-          {/* BOTTOM NAVIGATION */}
-          <nav className="bg-white border-t border-gray-200 py-2.5 px-6 flex justify-around items-center sticky bottom-0 z-30 shadow-lg">
+          {/* BOTTOM NAVIGATION TOOLBAR (5 MENU TOOLBAR) */}
+          <nav className="bg-white border-t border-gray-200 py-2 px-3 flex justify-around items-center sticky bottom-0 z-30 shadow-lg">
             <button
               onClick={() => setActiveTab('home')}
               className={`flex flex-col items-center gap-1 transition ${activeTab === 'home' ? 'text-emerald-700 font-bold' : 'text-gray-400 hover:text-gray-600'}`}
@@ -652,6 +725,16 @@
                 <i data-lucide="edit-3" className="w-5 h-5"></i>
               </div>
               <span className="text-[10px]">Pencatatan</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('qris')}
+              className={`flex flex-col items-center gap-1 transition ${activeTab === 'qris' ? 'text-emerald-700 font-bold' : 'text-gray-400 hover:text-gray-600'}`}
+            >
+              <div className={`p-1.5 rounded-full ${activeTab === 'qris' ? 'bg-emerald-50' : ''}`}>
+                <i data-lucide="qr-code" className="w-5 h-5"></i>
+              </div>
+              <span className="text-[10px]">QRIS</span>
             </button>
 
             <button
@@ -702,6 +785,7 @@
                   <div className="space-y-1 text-[11px] border-b border-dashed border-gray-300 pb-2">
                     <div className="flex justify-between"><span>No Nota:</span><span className="font-bold">{currentReceipt.id}</span></div>
                     <div className="flex justify-between"><span>Waktu:</span><span>{currentReceipt.date}</span></div>
+                    <div className="flex justify-between"><span>Metode:</span><span className="font-bold text-emerald-700">{currentReceipt.paymentMethod}</span></div>
                   </div>
 
                   <div className="space-y-1.5 border-b border-dashed border-gray-300 pb-2">
