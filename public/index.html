@@ -71,8 +71,7 @@
       // Active Tabs: 'home', 'bookings', 'qris', 'support', 'account'
       const [activeTab, setActiveTab] = useState('home');
 
-      // State Grafik Penjualan
-      const [chartMode, setChartMode] = useState('bar'); // 'bar' | 'line' | 'method'
+      // State Grafik Penjualan (Diagram Batang Murni)
       const [hoveredBar, setHoveredBar] = useState(null);
 
       // Inventaris Sembako
@@ -365,45 +364,28 @@
             {activeTab === 'home' && (
               <div className="space-y-4">
 
-                {/* CARD GRAFIK PENJUALAN DASHBOARD */}
+                {/* CARD GRAFIK PENJUALAN DASHBOARD (DIAGRAM BATANG MURNI) */}
                 <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3">
-                  {/* Header Grafik & Control Toggle */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-3">
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <div className="p-1.5 bg-emerald-100 text-emerald-800 rounded-lg">
-                          <i data-lucide="trending-up" className="w-4 h-4"></i>
-                        </div>
-                        <h3 className="font-extrabold text-xs text-slate-800 uppercase tracking-wide">
-                          GRAFIK PENJUALAN DASHBOARD
-                        </h3>
+                  {/* Header Grafik */}
+                  <div className="flex justify-between items-center border-b border-gray-100 pb-2.5">
+                    <div className="flex items-center gap-1.5">
+                      <div className="p-1.5 bg-emerald-100 text-emerald-800 rounded-lg">
+                        <i data-lucide="bar-chart-2" className="w-4 h-4"></i>
                       </div>
-                      <p className="text-[11px] text-slate-500 font-semibold mt-0.5">
-                        Tren Omset 7 Hari Terakhir & Real-time Update
-                      </p>
+                      <div>
+                        <h3 className="font-extrabold text-xs text-slate-800 uppercase tracking-wide">
+                          GRAFIK PENJUALAN BATANG
+                        </h3>
+                        <p className="text-[10px] text-slate-500 font-semibold">
+                          Omset Penjualan 7 Hari Terakhir & Real-time Update
+                        </p>
+                      </div>
                     </div>
 
-                    {/* Controls Mode Toggle */}
-                    <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-fit">
-                      <button
-                        onClick={() => setChartMode('bar')}
-                        className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold transition ${chartMode === 'bar' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
-                      >
-                        📊 Batang
-                      </button>
-                      <button
-                        onClick={() => setChartMode('line')}
-                        className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold transition ${chartMode === 'line' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
-                      >
-                        📈 Garis
-                      </button>
-                      <button
-                        onClick={() => setChartMode('method')}
-                        className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold transition ${chartMode === 'method' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
-                      >
-                        💳 Tunai vs QRIS
-                      </button>
-                    </div>
+                    <span className="text-[10px] bg-emerald-100 text-emerald-800 font-extrabold px-2.5 py-1 rounded-full flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                      <span>Grafik Batang Live</span>
+                    </span>
                   </div>
 
                   {/* Summary Stat Mini Badges */}
@@ -433,7 +415,7 @@
                             📍 {weeklyChartData[hoveredBar].day} {weeklyChartData[hoveredBar].isToday ? '(Hari Ini)' : ''}: {weeklyChartData[hoveredBar].count} Transaksi
                           </span>
                         ) : (
-                          <span>Pilih / Sentuh batang grafik untuk rincian</span>
+                          <span>Sentuh batang grafik untuk melihat rincian</span>
                         )}
                       </span>
                       <span className="text-emerald-400 font-black text-sm">
@@ -452,18 +434,6 @@
                             <stop offset="0%" stopColor="#facc15" />
                             <stop offset="100%" stopColor="#eab308" />
                           </linearGradient>
-                          <linearGradient id="tunaiGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#10b981" />
-                            <stop offset="100%" stopColor="#047857" />
-                          </linearGradient>
-                          <linearGradient id="qrisGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#38bdf8" />
-                            <stop offset="100%" stopColor="#0284c7" />
-                          </linearGradient>
-                          <linearGradient id="lineAreaGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" />
-                            <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
-                          </linearGradient>
                         </defs>
 
                         {/* Grid lines */}
@@ -478,7 +448,7 @@
                         <text x="5" y="114" fill="#94a3b8" fontSize="9" fontWeight="bold">{(maxChartValue * 0.3 / 1000000).toFixed(1)}M</text>
 
                         {/* Render Diagram Batang */}
-                        {chartMode === 'bar' && weeklyChartData.map((d, i) => {
+                        {weeklyChartData.map((d, i) => {
                           const barHeight = Math.max(12, (d.total / maxChartValue) * 105);
                           const xPos = 40 + i * 62;
                           const yPos = 140 - barHeight;
@@ -528,70 +498,6 @@
                             </g>
                           );
                         })}
-
-                        {/* Render Tunai vs QRIS */}
-                        {chartMode === 'method' && weeklyChartData.map((d, i) => {
-                          const totalHeight = Math.max(12, (d.total / maxChartValue) * 105);
-                          const tunaiHeight = (d.tunai / d.total) * totalHeight || totalHeight * 0.6;
-                          const qrisHeight = totalHeight - tunaiHeight;
-
-                          const xPos = 40 + i * 62;
-                          const yTunai = 140 - tunaiHeight;
-                          const yQris = yTunai - qrisHeight;
-                          const isHovered = hoveredBar === i;
-
-                          return (
-                            <g
-                              key={d.day}
-                              onMouseEnter={() => setHoveredBar(i)}
-                              onMouseLeave={() => setHoveredBar(null)}
-                              onClick={() => setHoveredBar(i)}
-                              className="cursor-pointer"
-                            >
-                              {isHovered && (
-                                <rect x={xPos - 6} y="20" width="48" height="125" fill="#1e293b" rx="8" opacity="0.6" />
-                              )}
-                              <rect x={xPos} y={yTunai} width="36" height={tunaiHeight} rx="4" fill="url(#tunaiGrad)" />
-                              <rect x={xPos} y={yQris} width="36" height={qrisHeight} rx="4" fill="url(#qrisGrad)" />
-                              <text x={xPos + 18} y={Math.max(18, yQris - 6)} fill="#38bdf8" fontSize="8" fontWeight="extrabold" textAnchor="middle">
-                                {(d.total / 1000).toFixed(0)}rb
-                              </text>
-                              <text x={xPos + 18} y="156" fill="#cbd5e1" fontSize="10" fontWeight="bold" textAnchor="middle">
-                                {d.label}
-                              </text>
-                            </g>
-                          );
-                        })}
-
-                        {/* Render Grafik Garis */}
-                        {chartMode === 'line' && (() => {
-                          const points = weeklyChartData.map((d, i) => {
-                            const x = 58 + i * 62;
-                            const y = 140 - Math.max(12, (d.total / maxChartValue) * 105);
-                            return { x, y, d, i };
-                          });
-
-                          const pathD = points.reduce((acc, p, i) => i === 0 ? `M ${p.x} ${p.y}` : `${acc} L ${p.x} ${p.y}`, '');
-                          const areaD = `${pathD} L ${points[points.length - 1].x} 140 L ${points[0].x} 140 Z`;
-
-                          return (
-                            <g>
-                              <path d={areaD} fill="url(#lineAreaGrad)" />
-                              <path d={pathD} fill="none" stroke="#10b981" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
-                              {points.map((p) => (
-                                <g key={p.d.day} onMouseEnter={() => setHoveredBar(p.i)} onClick={() => setHoveredBar(p.i)} className="cursor-pointer">
-                                  <circle cx={p.x} cy={p.y} r={hoveredBar === p.i ? "7" : "5"} fill={p.d.isToday ? "#facc15" : "#10b981"} stroke="#ffffff" strokeWidth="2" />
-                                  <text x={p.x} y={Math.max(16, p.y - 10)} fill="#34d399" fontSize="8" fontWeight="extrabold" textAnchor="middle">
-                                    {(p.d.total / 1000).toFixed(0)}rb
-                                  </text>
-                                  <text x={p.x} y="156" fill={p.d.isToday ? '#facc15' : '#cbd5e1'} fontSize="10" fontWeight="bold" textAnchor="middle">
-                                    {p.d.label}
-                                  </text>
-                                </g>
-                              ))}
-                            </g>
-                          );
-                        })()}
                       </svg>
                     </div>
 
