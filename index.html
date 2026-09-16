@@ -2,8 +2,8 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kasirku POS - Edit Stok Barang</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Kasirku POS - Toko Sembako</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -36,7 +36,7 @@
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: #f3f4f6;
+      background-color: #f8fafc;
     }
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -49,11 +49,11 @@
     }
   </style>
 </head>
-<body class="bg-gray-100 min-h-screen text-slate-800">
+<body class="bg-slate-100 min-h-screen text-slate-800">
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect, useMemo, useRef } = React;
+    const { useState, useEffect, useMemo } = React;
 
     // Master Sembako List
     const MASTER_SEMBAKO = [
@@ -68,61 +68,47 @@
     ];
 
     function App() {
-      const [viewMode, setViewMode] = useState('mobile');
-      const [activeTab, setActiveTab] = useState('home');
+      const [activeTab, setActiveTab] = useState('home'); // 'home', 'bookings', 'support', 'account'
 
-      // State Inventaris Sembako
+      // Inventaris Sembako
       const [inventory, setInventory] = useState(() => {
-        const saved = localStorage.getItem('master_sembako_edit');
+        const saved = localStorage.getItem('master_sembako_clean');
         return saved ? JSON.parse(saved) : MASTER_SEMBAKO;
       });
 
-      // --- STATE FORM PENCATATAN PENJUALAN ---
+      // Form Pencatatan Penjualan
       const [selectedSembakoId, setSelectedSembakoId] = useState('');
       const [customTitle, setCustomTitle] = useState('');
       const [inputPrice, setInputPrice] = useState('');
       const [inputQty, setInputQty] = useState(1);
       const [inputUnit, setInputUnit] = useState('Pcs');
 
-      // Item dalam Nota Penjualan Aktif
+      // Cart Nota Penjualan Aktif
       const [cart, setCart] = useState(() => {
-        const saved = localStorage.getItem('nota_sembako_cart_edit');
+        const saved = localStorage.getItem('nota_sembako_cart_clean');
         return saved ? JSON.parse(saved) : [];
       });
 
       // Transaksi Tersimpan
       const [transactions, setTransactions] = useState(() => {
-        const saved = localStorage.getItem('nota_sembako_transactions_edit');
+        const saved = localStorage.getItem('nota_sembako_transactions_clean');
         return saved ? JSON.parse(saved) : [];
       });
 
-      // Pembayaran & Modal Struk
+      // Modals
       const [cashGiven, setCashGiven] = useState('');
       const [currentReceipt, setCurrentReceipt] = useState(null);
 
-      // Modal Input Sembako Masuk (Tambah Baru)
+      // Modal Sembako Masuk & Edit
       const [isMasukModalOpen, setIsMasukModalOpen] = useState(false);
-      const [masukForm, setMasukForm] = useState({
-        title: '',
-        price: '',
-        stock: 20,
-        unit: 'Pcs'
-      });
+      const [masukForm, setMasukForm] = useState({ title: '', price: '', stock: 20, unit: 'Pcs' });
 
-      // Modal EDIT Stok Barang
       const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-      const [editingItem, setEditingItem] = useState(null);
-      const [editForm, setEditForm] = useState({
-        id: '',
-        title: '',
-        price: '',
-        stock: '',
-        unit: 'Pcs'
-      });
+      const [editForm, setEditForm] = useState({ id: '', title: '', price: '', stock: '', unit: 'Pcs' });
 
-      useEffect(() => { localStorage.setItem('master_sembako_edit', JSON.stringify(inventory)); }, [inventory]);
-      useEffect(() => { localStorage.setItem('nota_sembako_cart_edit', JSON.stringify(cart)); }, [cart]);
-      useEffect(() => { localStorage.setItem('nota_sembako_transactions_edit', JSON.stringify(transactions)); }, [transactions]);
+      useEffect(() => { localStorage.setItem('master_sembako_clean', JSON.stringify(inventory)); }, [inventory]);
+      useEffect(() => { localStorage.setItem('nota_sembako_cart_clean', JSON.stringify(cart)); }, [cart]);
+      useEffect(() => { localStorage.setItem('nota_sembako_transactions_clean', JSON.stringify(transactions)); }, [transactions]);
       useEffect(() => { if (window.lucide) window.lucide.createIcons(); });
 
       // Select Sembako Handler
@@ -233,7 +219,7 @@
         setCashGiven('');
       };
 
-      // Handle Tambah Barang Baru (Sembako Masuk)
+      // Tambah Sembako Baru
       const handleMasukSubmit = (e) => {
         e.preventDefault();
         if (!masukForm.title || !masukForm.price) {
@@ -255,9 +241,8 @@
         alert(`SUKSES! Stok Sembako Masuk "${newProd.title}" (+${newProd.stock} ${newProd.unit}) telah ditambahkan.`);
       };
 
-      // --- HANDLER EDIT STOK BARANG ---
+      // Edit Item Stok
       const openEditModal = (item) => {
-        setEditingItem(item);
         setEditForm({
           id: item.id,
           title: item.title,
@@ -275,34 +260,27 @@
           return;
         }
 
-        const updatedTitle = editForm.title.trim();
-        const updatedPrice = parseFloat(editForm.price) || 0;
-        const updatedStock = parseInt(editForm.stock) || 0;
-        const updatedUnit = editForm.unit.trim() || 'Pcs';
-
         setInventory(prev => prev.map(inv => {
           if (inv.id === editForm.id) {
             return {
               ...inv,
-              title: updatedTitle,
-              price: updatedPrice,
-              stock: updatedStock,
-              unit: updatedUnit
+              title: editForm.title.trim(),
+              price: parseFloat(editForm.price) || 0,
+              stock: parseInt(editForm.stock) || 0,
+              unit: editForm.unit.trim() || 'Pcs'
             };
           }
           return inv;
         }));
 
         setIsEditModalOpen(false);
-        setEditingItem(null);
-        alert(`BERHASIL! Data Sembako "${updatedTitle}" telah diperbarui.`);
+        alert(`BERHASIL! Data Sembako "${editForm.title}" telah diperbarui.`);
       };
 
       const handleDeleteItem = (id, title) => {
         if (confirm(`Yakin ingin menghapus sembako "${title}" dari daftar stok?`)) {
           setInventory(prev => prev.filter(inv => inv.id !== id));
           setIsEditModalOpen(false);
-          setEditingItem(null);
         }
       };
 
@@ -311,80 +289,42 @@
       };
 
       return (
-        <div className="min-h-screen pb-20 md:pb-6 flex flex-col items-center justify-start">
+        <div className="min-h-screen flex flex-col justify-between max-w-2xl mx-auto bg-white shadow-sm border-x border-slate-200">
 
-          {/* Top Header */}
-          <header className="w-full bg-slate-900 text-white py-2 px-4 flex justify-between items-center text-xs shadow-md sticky top-0 z-50">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span className="font-bold tracking-wide text-sm">Kasirku POS</span>
-              <span className="bg-slate-800 text-emerald-400 px-2 py-0.5 rounded border border-slate-700 hidden sm:inline">Fitur Edit Stok</span>
+          {/* MAIN NATIVE APP HEADER */}
+          <header className="bg-slate-900 text-white px-4 py-3 border-b border-slate-800 sticky top-0 z-30 flex items-center justify-between shadow-sm">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500 text-slate-950 flex items-center justify-center font-black shadow">
+                <i data-lucide="store" className="w-5 h-5"></i>
+              </div>
+              <div>
+                <h1 className="text-sm font-extrabold tracking-wide">Toko Sembako Berkah Jaya</h1>
+                <p className="text-[11px] text-emerald-400 font-semibold">Pencatatan Penjualan Kasir</p>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="text-gray-400">Tampilan Perangkat:</span>
-              <button
-                onClick={() => setViewMode('mobile')}
-                className={`px-2.5 py-1 rounded-md font-semibold transition ${viewMode === 'mobile' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-gray-300 hover:bg-slate-700'}`}
-              >
-                Smartphone (IPhone)
-              </button>
-              <button
-                onClick={() => setViewMode('desktop')}
-                className={`px-2.5 py-1 rounded-md font-semibold transition ${viewMode === 'desktop' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-gray-300 hover:bg-slate-700'}`}
-              >
-                Layar Penuh (Desktop)
-              </button>
-            </div>
+            <button
+              onClick={() => setIsMasukModalOpen(true)}
+              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow-sm transition"
+            >
+              <i data-lucide="plus" className="w-4 h-4"></i>
+              <span>+ Stok Masuk</span>
+            </button>
           </header>
 
-          {/* MAIN CONTAINER */}
-          <main className={`w-full transition-all duration-300 ${viewMode === 'mobile' ? 'max-w-[420px] my-4 shadow-2xl rounded-[40px] border-[10px] border-slate-900 bg-white overflow-hidden min-h-[840px] relative' : 'max-w-7xl mx-auto my-4 px-4 bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden'}`}>
+          {/* MAIN RESPONSIVE CONTENT AREA */}
+          <main className="flex-1 p-3 sm:p-4 bg-slate-50 space-y-4">
 
-            {/* Status Bar for Mobile */}
-            {viewMode === 'mobile' && (
-              <div className="bg-white px-6 pt-3 pb-1 flex justify-between items-center text-xs font-semibold text-slate-800 border-b border-gray-100">
-                <span>9:41</span>
-                <div className="w-24 h-4 bg-slate-900 rounded-full mx-auto -mt-1 shadow-inner"></div>
-                <div className="flex items-center gap-1.5">
-                  <i data-lucide="signal" className="w-3.5 h-3.5"></i>
-                  <i data-lucide="wifi" className="w-3.5 h-3.5"></i>
-                  <i data-lucide="battery" className="w-4 h-4"></i>
-                </div>
-              </div>
-            )}
-
-            {/* App Header Bar */}
-            <div className="bg-white px-4 py-3 border-b border-gray-100 flex items-center justify-between sticky top-0 z-30 shadow-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
-                  <i data-lucide="store" className="w-4 h-4 text-emerald-600"></i>
-                </div>
-                <div>
-                  <h2 className="text-xs font-bold text-gray-800">Toko Sembako Berkah Jaya</h2>
-                  <p className="text-[11px] text-gray-400">Pencatatan Penjualan & Edit Stok</p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setIsMasukModalOpen(true)}
-                className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-1 transition shadow-sm"
-              >
-                <i data-lucide="plus" className="w-3.5 h-3.5"></i>
-                <span>+ Sembako Masuk</span>
-              </button>
-            </div>
-
-            {/* TAB CONTENT: HOME (PENCATATAN PENJUALAN UTAMA) */}
+            {/* TAB CONTENT: KASIR PENCATATAN UTAMA */}
             {activeTab === 'home' && (
-              <div className="p-4 space-y-4 bg-slate-50 min-h-[700px]">
+              <div className="space-y-4">
 
                 {/* FORM INPUT CEPAT PENJUALAN */}
                 <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3">
                   <div className="flex justify-between items-center border-b border-gray-100 pb-2">
                     <h3 className="font-extrabold text-xs text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
                       <i data-lucide="plus-circle" className="w-4 h-4 text-emerald-600"></i>
-                      <span>INPUT PENJUALAN SEMBAKO (BARANG KELUAR)</span>
+                      <span>INPUT PENJUALAN SEMBAKO</span>
                     </h3>
                     <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">
                       Fast Entry
@@ -397,7 +337,7 @@
                       <select
                         value={selectedSembakoId}
                         onChange={(e) => handleSelectSembakoChange(e.target.value)}
-                        className="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-3 py-2.5 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500"
                       >
                         <option value="">-- Pilih dari Daftar Sembako --</option>
                         {inventory.map(item => (
@@ -467,7 +407,7 @@
                   </form>
                 </div>
 
-                {/* TABEL RINGKASAN NOTA PENJUALAN SAAT INI */}
+                {/* TABEL RINGKASAN NOTA BELANJA */}
                 <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3">
                   <div className="flex justify-between items-center border-b border-gray-100 pb-2">
                     <h3 className="font-extrabold text-xs text-slate-800 uppercase tracking-wide">
@@ -524,7 +464,7 @@
                   </div>
                 </div>
 
-                {/* KALKULATOR PEMBAYARAN & CETAK NOTA */}
+                {/* KALKULATOR PEMBAYARAN */}
                 {cart.length > 0 && (
                   <div className="bg-slate-900 text-white p-4 rounded-2xl shadow-md space-y-3">
                     <div className="flex justify-between items-center border-b border-slate-800 pb-2">
@@ -565,7 +505,7 @@
 
             {/* TAB CONTENT: PESANAN */}
             {activeTab === 'bookings' && (
-              <div className="p-4 space-y-4 bg-slate-50 min-h-[700px]">
+              <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <h2 className="text-base font-bold text-slate-800">Riwayat Penjualan Sembako</h2>
                   <span className="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full">
@@ -581,8 +521,8 @@
                 ) : (
                   <div className="space-y-3">
                     {transactions.map(trx => (
-                      <div key={trx.id} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-3">
-                        <div className="flex justify-between items-start border-b border-gray-50 pb-2">
+                      <div key={trx.id} className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3">
+                        <div className="flex justify-between items-start border-b border-gray-100 pb-2">
                           <div>
                             <div className="font-bold text-xs text-slate-800 flex items-center gap-2">
                               <span>{trx.id}</span>
@@ -604,7 +544,7 @@
                           ))}
                         </div>
 
-                        <div className="pt-2 border-t border-gray-50 flex justify-end">
+                        <div className="pt-2 border-t border-gray-100 flex justify-end">
                           <button
                             onClick={() => setCurrentReceipt(trx)}
                             className="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-semibold flex items-center gap-1"
@@ -622,17 +562,17 @@
 
             {/* TAB CONTENT: LAPORAN */}
             {activeTab === 'support' && (
-              <div className="p-4 space-y-4 bg-slate-50 min-h-[700px]">
+              <div className="space-y-4">
                 <h2 className="text-base font-bold text-slate-800">Laporan Penjualan Sembako</h2>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-1">
+                  <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-1">
                     <p className="text-[11px] text-gray-400 font-medium">Total Omset Penjualan</p>
                     <p className="text-base font-extrabold text-emerald-600">
                       {formatRp(transactions.reduce((acc, t) => acc + t.total, 0))}
                     </p>
                   </div>
-                  <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-1">
+                  <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-1">
                     <p className="text-[11px] text-gray-400 font-medium">Total Nota Terjual</p>
                     <p className="text-base font-extrabold text-slate-800">{transactions.length} Nota</p>
                   </div>
@@ -640,9 +580,9 @@
               </div>
             )}
 
-            {/* TAB CONTENT: STOK BARANG & MENU EDIT (DENGAN TOMBOL EDIT & RESTOCK) */}
+            {/* TAB CONTENT: STOK BARANG & EDIT */}
             {activeTab === 'account' && (
-              <div className="p-4 space-y-4 bg-slate-50 min-h-[700px]">
+              <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <div>
                     <h2 className="text-base font-bold text-slate-800">Data Stok Sembako & Menu Edit</h2>
@@ -657,7 +597,6 @@
                   </button>
                 </div>
 
-                {/* DAFTAR ITEM STOK DENGAN MENU EDIT & RESTOCK */}
                 <div className="space-y-2.5">
                   {inventory.map(p => (
                     <div key={p.id} className="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between gap-3">
@@ -671,7 +610,6 @@
                         </div>
                       </div>
 
-                      {/* TOMBOL AKSI: EDIT & RESTOCK */}
                       <div className="flex items-center gap-1.5">
                         <button
                           onClick={() => openEditModal(p)}
@@ -702,50 +640,50 @@
               </div>
             )}
 
-            {/* Bottom Nav */}
-            <nav className="bg-white border-t border-gray-100 py-2 px-6 flex justify-around items-center sticky bottom-0 z-30 shadow-lg">
-              <button
-                onClick={() => setActiveTab('home')}
-                className={`flex flex-col items-center gap-1 transition ${activeTab === 'home' ? 'text-emerald-700 font-bold' : 'text-gray-400 hover:text-gray-600'}`}
-              >
-                <div className={`p-1.5 rounded-full ${activeTab === 'home' ? 'bg-emerald-50' : ''}`}>
-                  <i data-lucide="edit-3" className="w-5 h-5"></i>
-                </div>
-                <span className="text-[10px]">Pencatatan</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('bookings')}
-                className={`flex flex-col items-center gap-1 transition ${activeTab === 'bookings' ? 'text-emerald-700 font-bold' : 'text-gray-400 hover:text-gray-600'}`}
-              >
-                <div className={`p-1.5 rounded-full ${activeTab === 'bookings' ? 'bg-emerald-50' : ''}`}>
-                  <i data-lucide="calendar" className="w-5 h-5"></i>
-                </div>
-                <span className="text-[10px]">Pesanan</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('support')}
-                className={`flex flex-col items-center gap-1 transition ${activeTab === 'support' ? 'text-emerald-700 font-bold' : 'text-gray-400 hover:text-gray-600'}`}
-              >
-                <div className={`p-1.5 rounded-full ${activeTab === 'support' ? 'bg-emerald-50' : ''}`}>
-                  <i data-lucide="headphones" className="w-5 h-5"></i>
-                </div>
-                <span className="text-[10px]">Laporan</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('account')}
-                className={`flex flex-col items-center gap-1 transition ${activeTab === 'account' ? 'text-emerald-700 font-bold' : 'text-gray-400 hover:text-gray-600'}`}
-              >
-                <div className={`p-1.5 rounded-full ${activeTab === 'account' ? 'bg-emerald-50' : ''}`}>
-                  <i data-lucide="user" className="w-5 h-5"></i>
-                </div>
-                <span className="text-[10px]">Stok</span>
-              </button>
-            </nav>
-
           </main>
+
+          {/* BOTTOM NAVIGATION */}
+          <nav className="bg-white border-t border-gray-200 py-2.5 px-6 flex justify-around items-center sticky bottom-0 z-30 shadow-lg">
+            <button
+              onClick={() => setActiveTab('home')}
+              className={`flex flex-col items-center gap-1 transition ${activeTab === 'home' ? 'text-emerald-700 font-bold' : 'text-gray-400 hover:text-gray-600'}`}
+            >
+              <div className={`p-1.5 rounded-full ${activeTab === 'home' ? 'bg-emerald-50' : ''}`}>
+                <i data-lucide="edit-3" className="w-5 h-5"></i>
+              </div>
+              <span className="text-[10px]">Pencatatan</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('bookings')}
+              className={`flex flex-col items-center gap-1 transition ${activeTab === 'bookings' ? 'text-emerald-700 font-bold' : 'text-gray-400 hover:text-gray-600'}`}
+            >
+              <div className={`p-1.5 rounded-full ${activeTab === 'bookings' ? 'bg-emerald-50' : ''}`}>
+                <i data-lucide="calendar" className="w-5 h-5"></i>
+              </div>
+              <span className="text-[10px]">Pesanan</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('support')}
+              className={`flex flex-col items-center gap-1 transition ${activeTab === 'support' ? 'text-emerald-700 font-bold' : 'text-gray-400 hover:text-gray-600'}`}
+            >
+              <div className={`p-1.5 rounded-full ${activeTab === 'support' ? 'bg-emerald-50' : ''}`}>
+                <i data-lucide="headphones" className="w-5 h-5"></i>
+              </div>
+              <span className="text-[10px]">Laporan</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('account')}
+              className={`flex flex-col items-center gap-1 transition ${activeTab === 'account' ? 'text-emerald-700 font-bold' : 'text-gray-400 hover:text-gray-600'}`}
+            >
+              <div className={`p-1.5 rounded-full ${activeTab === 'account' ? 'bg-emerald-50' : ''}`}>
+                <i data-lucide="user" className="w-5 h-5"></i>
+              </div>
+              <span className="text-[10px]">Stok</span>
+            </button>
+          </nav>
 
           {/* Struk Thermal Modal */}
           {currentReceipt && (
@@ -885,7 +823,7 @@
             </div>
           )}
 
-          {/* Modal Input Sembako Masuk (Tambah Baru) */}
+          {/* Modal Input Sembako Masuk */}
           {isMasukModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
               <form onSubmit={handleMasukSubmit} className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4 relative">
